@@ -21,15 +21,13 @@ class Vertex:
 
 
 class ASC:
-    ''' Abstract Simplicial Complex
+    ''' Representation of an Abstract Simplicial Complex in a tree like format
     '''
     def __init__(self, *args, **kwargs):
         '''
         '''
         self.root           = Vertex(label = "root", level = -1)
         self.vertex_tracker = {}
-
-        ## Don't use these for anything at the moment
         self.level_tracker  = collections.defaultdict(set)
         self.max_level      = 0
 
@@ -37,6 +35,7 @@ class ASC:
         for vertex in kwargs["vertices"]:
             vertex.level = 0
             self._add_link(self.root, vertex)
+        self.level_tracker[0] = set((self.root,))
 
 
     def _add_link(self, parent, vertex):
@@ -47,24 +46,8 @@ class ASC:
         self.vertex_tracker[(parent.label, vertex.label, vertex.level)] = vertex
 
 
-    def _ret_simplices(self, n, simplices, parent = None, labels = []):
-        ''' internal method to traverse tree structure and return n-simplexes
-        '''
-        if parent is None:
-            parent = self.root
 
-        for child in parent.connections:
-            labels.append(child.label)
-            if len(labels[child.level - n:]) == n + 1:
-                simplices.append(labels[child.level - n:])
-            if child.level >= n:
-                self._ret_simplices(n, simplices, child, labels[n - child.level + 1:])
-            else:
-                self._ret_simplices(n, simplices, child, labels)
-
-            labels.pop()
-
-
+    # TO DO: Is order of connections important ?
     def add_connections(self, labels):
         '''
         :param tuple: labels: vertices having a connection
@@ -83,11 +66,44 @@ class ASC:
         self.max_level = max(self.max_level, i + 1)
 
 
+
+    def _get_simplices(self, n, simplices, parent = None, labels = []):
+        ''' recursive method to retrieve labels asscoiated with all n-simplices under a parent
+        :param int: n: dimension of the simplex
+        :param list: simplices: container for storing any n-simplex found
+        :param Vertex: parent: Parent vertex to start the search under
+        :param list: labels: ordered list of labels associated with each vertex (top -> bottom)
+        '''
+        if parent is None:
+            parent = self.root
+
+        # can take the sorted() out, keeping it for easier debugging
+        for child in sorted(parent.connections, key = lambda e: e.label):
+            labels.append(child.label)
+            if child.level == n:
+                simplices.append(list(labels))
+                labels.pop()
+            elif child.level > n:
+                break
+            else:
+                self._get_simplices(n, simplices, child, labels)
+
+        if labels:
+            labels.pop()
+
+
     def ret_all_simplices(self, n):
         ''' public method to return all n-simplices
         :param int: n: Return labels associated with all simplices of dimension n in this ASC
         '''
         simplices = []
-        self._ret_simplices(n, simplices)
-        return simplices
+        seen     = set()
+        for i in range(n, self.max_level + 1):
+            for parent in self.level_tracker[i]:
+                if parent.label in seen:
+                    continue
+                seen.add(parent.label)
+                labels = [parent.label] if parent.label != "root" else []
+                self._get_simplices(n, simplices, parent, labels)
 
+        return simplices
