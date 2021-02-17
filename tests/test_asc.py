@@ -69,54 +69,67 @@ class TestASCInsertConnection(unittest.TestCase):
         '''
         pass
 
-class TestExampleA(unittest.TestCase):
+
+class TestExamples(unittest.TestCase):
     def setUp(self):
         '''
         '''
-        self.vertices = set((abst_simplcl_cmplx.Vertex(label = "Cow"),
-                             abst_simplcl_cmplx.Vertex(label = "Rabbit"),
-                             abst_simplcl_cmplx.Vertex(label = "Horse"),
-                             abst_simplcl_cmplx.Vertex(label = "Dog"),
-                             abst_simplcl_cmplx.Vertex(label = "Fish"),
-                             abst_simplcl_cmplx.Vertex(label = "Dolphin"),
-                             abst_simplcl_cmplx.Vertex(label = "Oyster"),
-                             abst_simplcl_cmplx.Vertex(label = "Broccoli"),
-                             abst_simplcl_cmplx.Vertex(label = "Fern"),
-                             abst_simplcl_cmplx.Vertex(label = "Onion"),
-                             abst_simplcl_cmplx.Vertex(label = "Apple")))
-        self.simplicial_complex = abst_simplcl_cmplx.ASC(vertices = self.vertices)
-        self.simplicial_complex.add_connections(("Cow", "Rabbit"))
-        self.simplicial_complex.add_connections(("Cow", "Horse"))
-        self.simplicial_complex.add_connections(("Rabbit", "Horse"))
-        self.simplicial_complex.add_connections(("Rabbit", "Dog"))
-        self.simplicial_complex.add_connections(("Horse", "Dog"))
-        self.simplicial_complex.add_connections(("Fish", "Dolphin"))
-        self.simplicial_complex.add_connections(("Fish", "Oyster"))
-        self.simplicial_complex.add_connections(("Dolphin", "Oyster"))
-        self.simplicial_complex.add_connections(("Broccoli", "Fern"))
-        self.simplicial_complex.add_connections(("Broccoli", "Onion"))
-        self.simplicial_complex.add_connections(("Broccoli", "Apple"))
-        self.simplicial_complex.add_connections(("Fern", "Onion"))
-        self.simplicial_complex.add_connections(("Fern", "Apple"))
-        self.simplicial_complex.add_connections(("Onion", "Apple"))
-        self.simplicial_complex.add_connections(("Cow", "Rabbit", "Horse"))
-        self.simplicial_complex.add_connections(("Cow", "Rabbit", "Dog"))
-        self.simplicial_complex.add_connections(("Cow", "Horse", "Dog"))
-        self.simplicial_complex.add_connections(("Rabbit", "Horse", "Dog"))
-        self.simplicial_complex.add_connections(("Fish", "Dolphin", "Oyster"))
-        self.simplicial_complex.add_connections(("Broccoli", "Fern", "Onion"))
-        self.simplicial_complex.add_connections(("Broccoli", "Fern", "Apple"))
-        self.simplicial_complex.add_connections(("Broccoli", "Onion", "Apple"))
-        self.simplicial_complex.add_connections(("Fern", "Onion", "Apple"))
-
+        pass
 
     def test_exampleA(self):
         '''
         '''
-        # TO DO: Add better checks here, pull out the harded coded stuff above to something more generic and add example B
-        self.assertEqual(len(self.simplicial_complex.ret_all_simplices(2)), 9)
-        self.assertEqual(len(self.simplicial_complex.ret_all_simplices(1)), 14)
-        self.assertEqual(len(self.simplicial_complex.ret_all_simplices(0)), len(self.vertices))
+        vertices = set(
+            (abst_simplcl_cmplx.Vertex(label = label) for label in \
+             ["Cow", "Rabbit", "Horse", "Dog", "Fish",
+              "Dolphin", "Oyster", "Broccoli", "Fern", "Onion", "Apple"]))
+        simplicial_complex = abst_simplcl_cmplx.ASC(vertices = vertices)
+        for connections in [
+                ("Cow", "Rabbit"), ("Cow", "Horse"), ("Cow", "Dog"),
+                ("Rabbit", "Horse"), ("Rabbit", "Dog"), ("Horse", "Dog"),
+                ("Fish", "Dolphin"), ("Fish", "Oyster"), ("Dolphin", "Oyster"),
+                ("Broccoli", "Fern"), ("Broccoli", "Onion"), ("Broccoli", "Apple"),
+                ("Fern", "Onion"), ("Fern", "Apple"),
+                ("Onion", "Apple"),
+                ("Cow", "Rabbit", "Horse"), ("Cow", "Rabbit", "Dog"),
+                ("Cow", "Horse", "Dog"), ("Rabbit", "Horse", "Dog"),
+                ("Fish", "Dolphin", "Oyster"),
+                ("Broccoli", "Fern", "Onion"),
+                ("Broccoli", "Fern", "Apple"),
+                ("Broccoli", "Onion", "Apple"),
+                ("Fern", "Onion", "Apple")]:
+            simplicial_complex.add_connections(connections)
+        self.assertEqual(len(simplicial_complex.ret_all_simplices(2)), 9)
+        self.assertEqual(len(simplicial_complex.ret_all_simplices(1)), 15)
+        self.assertEqual(len(simplicial_complex.ret_all_simplices(0)), len(vertices))
+
+
+    def test_exampleB(self):
+        '''
+        '''
+        vertices = set(
+            (abst_simplcl_cmplx.Vertex(label = label) for label in \
+             ["Cow", "Rabbit", "Horse", "Dog", "Fish",
+              "Dolphin", "Oyster", "Broccoli", "Fern", "Onion", "Apple"]))
+        simplicial_complex = abst_simplcl_cmplx.ASC(vertices = vertices)
+        for connections in [
+                ("Cow", "Rabbit"), ("Cow", "Fish"), ("Cow", "Oyster"),
+                ("Cow", "Broccoli"), ("Cow", "Onion"), ("Cow", "Apple"),
+                ("Rabbit", "Fish"), ("Rabbit", "Oyster"), ("Rabbit", "Broccoli"),
+                ("Rabbit", "Onion"), ("Rabbit", "Apple"), ("Fish", "Oyster"),
+                ("Fish", "Broccoli"), ("Fish", "Onion"), ("Fish", "Apple"),
+                ("Oyster", "Broccoli"), ("Oyster", "Onion"), ("Oyster", "Apple"),
+                ("Broccoli", "Onion"), ("Broccoli", "Apple"), ("Onion", "Apple"),
+                ("Horse", "Dog"), ("Horse", "Dolphin"), ("Horse", "Fern"),
+                ("Dog", "Dolphin"), ("Dog", "Fern"), ("Dolphin", "Fern"),
+                ("Cow", "Broccoli", "Apple"), ("Cow", "Onion", "Apple"),
+                ("Rabbit", "Broccoli", "Apple"), ("Rabbit", "Onion", "Apple"),
+                ("Fish", "Broccoli", "Apple"), ("Fish", "Onion", "Apple"),
+                ("Oyster", "Broccoli", "Apple"), ("Oyster", "Onion", "Apple")]:
+            simplicial_complex.add_connections(connections)
+        self.assertEqual(len(simplicial_complex.ret_all_simplices(2)), 8)
+        self.assertEqual(len(simplicial_complex.ret_all_simplices(1)), 27)
+        self.assertEqual(len(simplicial_complex.ret_all_simplices(0)), len(vertices))
 
 
 
