@@ -3,7 +3,7 @@
 ## Representation of an abstract simplicial complex as a tree datastructure in Python3.
 
 #### Usage - Assuming python3.5+, should work for any python3
-```
+```python
 import abst_simplcl_cmplx
 
 ## Initialize an abstract simplicial complex
