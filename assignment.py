@@ -1,10 +1,12 @@
 ## stdlib
+import itertools
 import pprint
+import sys
 
 ## our modules
 import abst_simplcl_cmplx
 
-## 3rd part
+## 3rd party
 import numpy as np
 
 
@@ -64,10 +66,32 @@ partB = DataCoding1(
         ("Oyster", "Broccoli", "Apple"), ("Oyster", "Onion", "Apple")])
 
 
+
 def submission2(data, label):
-    ''' Submission for coding assignment 2
+    ''' Submission for coding assignment 2 - Boundaries of the p-chains.
     '''
-    print(f"Boundary Matrix for {label}:\n")
+    ## Boundaries in C_2 are the boundaries of all 2-simplices, i.e. all edges or 1-simplices
+    print("Boundaries in $C_2$ are: \n")
+    for simplex in data.simplicial_complex.ret_all_simplices(2):
+        out = []
+        for b in itertools.combinations(list(simplex), 2):
+            out.append(str(tuple(b)))
+        out = " + ".join(out)
+        print("Boundary of the 2-simplex: {} is: {}\n".format(tuple(simplex), out))
+    ## Boundaries in C_1 are the boundaries of all 1-simplices, i.e. all vertices or  0-simplices
+    print("\nBoundaries in $C_1$ are: \n")
+    for simplex in data.simplicial_complex.ret_all_simplices(1):
+        v1, v2 = list(simplex)
+        print("Boundary of the 1-simplex: {} is: {} + {}\n".format(tuple(simplex), v1, v2))
+    ## Boundaries of C_0 are the boundaries of all 0-simplices, i.e. just 0
+    print("\nBoundaries in $C_0$ are: \n")
+    print("\nBoundary of a vertex is 0, so all boundaries in $C_0$ are just 0.")
+
+def submission3(data, label):
+    ''' Submission for coding assignment 3 - Boundary Matrices
+    '''
+    ## Using numpy as it prints larger matrices better
+    print("Boundary Matrix for {}:\n".format(label))
     print("del2:")
     pprint.pprint(np.matrix(data.simplicial_complex.ret_boundary_matrix(2)))
     print("del1:")
@@ -77,6 +101,18 @@ def submission2(data, label):
     print("\n")
 
 
+
 if __name__ == '__main__':
-    submission2(partA, "Part A")
-    submission2(partB, "Part B")
+    if len(sys.argv) == 1:
+        print("Specify param coding2 or coding3 for specific output")
+        sys.exit(0)
+    if sys.argv[1].lower() == "coding2":
+        print("PartA\n")
+        submission2(partA, "Part A")
+        print("\n-------------------------------------------------------------------\n")
+        print("PartB\n")
+        submission2(partB, "Part B")
+        print("\n-------------------------------------------------------------------\n")
+    elif sys.argv[1].lower() == "coding3":
+        submission3(partA, "Part A")
+        submission3(partB, "Part B")
