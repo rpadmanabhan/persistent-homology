@@ -3,7 +3,7 @@ import collections
 
 
 class Vertex:
-    ''' Represents a vertex in an ASC
+    ''' Representation of a vertex in the ASC class
     '''
     def __init__(self, *args, **kwargs):
         '''
@@ -12,12 +12,27 @@ class Vertex:
         self.parent           = kwargs.get("parent", None)
         self.level            = kwargs.get("level", None)
         self.connections      = kwargs.get("connections", set()) # child connections
-        self.tree_connections = kwargs.get("tree_connections", set()) # connections to vertices in other parts of the tree
 
     def __repr__(self):
         '''
         '''
         return "Vertex(label = {}, level = {})".format(self.label, self.level)
+
+
+class ASCInsertionError(Exception):
+    ''' Exception raised for invalid insertions to ASC
+    '''
+    def __init__(self, *args, **kwargs):
+        '''
+        '''
+        self.simplex_inserted = kwargs.get("simplex_inserted", None) # tried to insert
+        self.face             = kwargs.get("face", None) # but this face was not present already
+        if self.face and self.simplex_inserted:
+            self.message = "You are trying to insert a higher dimensional simplex: {} " \
+                           "but one of its faces: {} is not in the Simplicial Complex.".format(
+                               self.simplex_inserted, self.face)
+    def __str__(self):
+        return self.message
 
 
 class ASC:
@@ -43,24 +58,35 @@ class ASC:
         '''
         vertex.parent = parent
         parent.connections.add(vertex)
-        # mark a connection to this child vertex from the same labeled vertex at the root level., i.e. level0 to leveln connection
-        if parent.label != "root":
-            self.vertex_tracker[("root", vertex.label, 0)].tree_connections.add(vertex)
         # track this vertex by some key - not sure if this is the best way
         self.vertex_tracker[(parent.label, vertex.label, vertex.level)] = vertex
 
 
 
-    # TO DO: Is order of connections important ?
+    # TO DO: Is order of connections important ? - still a little unsure about how to go about it.
+    ## Working in Z_2 for now. But since we are encoding the connections in a tree, a consistent ordering is needed.
+    ## Some options to consider:
+    ## 1. Make the assumption that labels is sorted by caller in some consistent fashion. (e.g. lexicographically)
+    ## 2. Always sort labels and abstract this away from person calling it ?
+    ## 3. Provide a pre_sorted option ?
+    ## Choosing 2. for now to keep it simple.
     def add_connections(self, labels):
         '''
         :param tuple: labels: vertices having a connection
         '''
-        parent = self.vertex_tracker[("root", labels[0], 0)]
+        labels = sorted(labels)
+        parent = self.vertex_tracker.get(("root", labels[0], 0), None)
+        if parent is None:
+            raise ASCInsertionError(tuple(labels), tuple((parent.label,)))
 
         for i in range(0, len(labels) - 1):
+            if ("root", labels[i+1], 0) not in self.vertex_tracker:
+                raise ASCInsertionError(tuple(labels), tuple((parent.label,)))
             vertex = self.vertex_tracker.get((parent.label, labels[i + 1], i + 1), None)
             if vertex is None:
+                ## We always expect a lower dim simplex to be present in this case. E.g. inserting {"Cow", "Horse"} => {"Cow"} is present
+                if len(labels) > 2 and (parent.label, labels[i + 1], i) not in self.vertex_tracker:
+                    raise ASCInsertionError(tuple(labels), tuple((parent.label, labels[i+1])))
                 vertex = Vertex(label = labels[i + 1], parent = parent, level = i + 1)
             self._add_link(parent, vertex)
             parent = vertex
@@ -68,7 +94,6 @@ class ASC:
         # keep track of topmost vertex and its levels - might be useful for retreiving n-simplices - NOT SURE
         self.level_tracker[i + 1].add(self.vertex_tracker[("root", labels[0], 0)])
         self.max_level = max(self.max_level, i + 1)
-
 
 
     def _get_simplices(self, n, simplices, parent = None, labels = []):
@@ -116,7 +141,8 @@ class ASC:
 
 
     def ret_boundary_matrix(self, dim):
-        '''
+        ''' public method to return the boundary matrix for a particular boundary map
+        :param int: dim: corresponding boundary map, e.g. dim = 1 for delta_1; dim = 2 for delta_2, etc.
         '''
         # Get all simplices in C_{dim} and C_{dim-1}
         generators_C_dim         = self.ret_all_simplices(dim)
@@ -129,6 +155,7 @@ class ASC:
                            for row in range(len(generators_C_dim_minus_1))]
         ## fill matrix with a 1 if there one generator is a boundary of the other
         ## e.g. {Dog} subset {Dog, Horse}; {Dog, Horse} subset {Dog, Horse, Cat}
+        ## Using Z_2 for encoding the boundary map/matrix
         for i, r in enumerate(generators_C_dim_minus_1):
             for j, c in enumerate(generators_C_dim):
                 if r.issubset(c):

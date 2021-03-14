@@ -54,11 +54,10 @@ class TestASCInsertConnection(unittest.TestCase):
         self.simplicial_complex.add_connections(("Cow", "Horse"))
         self.simplicial_complex.add_connections(("Rabbit", "Horse"))
         self.simplicial_complex.add_connections(("Cow", "Rabbit", "Horse"))
-
-        self.assertEqual(self.simplicial_complex.vertex_tracker[("Rabbit", "Horse", 2)].level, 2)
+        ## Note: order is different here, because add_connections always sorts lexicographically.
+        self.assertEqual(self.simplicial_complex.vertex_tracker[("Horse", "Rabbit", 2)].level, 2)
         self.assertEqual(self.simplicial_complex.vertex_tracker[("Cow", "Horse", 1)].level, 1)
-        self.assertEqual(self.simplicial_complex.vertex_tracker[("Rabbit", "Horse", 1)].level, 1)
-
+        self.assertEqual(self.simplicial_complex.vertex_tracker[("Horse", "Rabbit", 1)].level, 1)
 
         self.assertEqual(self.simplicial_complex.ret_all_simplices(2),
                          [{"Cow", "Rabbit", "Horse"}])
@@ -66,6 +65,18 @@ class TestASCInsertConnection(unittest.TestCase):
                          sorted([{"Cow", "Rabbit"}, {"Cow", "Horse"}, {"Rabbit", "Horse"}], key = sorted))
         self.assertEqual(sorted(self.simplicial_complex.ret_all_simplices(0), key = sorted),
                          sorted([{"Cow"}, {"Rabbit"}, {"Horse"}, {"Dog"}], key = sorted))
+
+
+    def test_insert_connections_invalid(self):
+        ''' Make sure we throw an exception when an invalid insertion takes place.
+        '''
+        self.assertRaises(abst_simplcl_cmplx.ASCInsertionError,
+                          self.simplicial_complex.add_connections,
+                          ("Zebra", "Cow"))
+        self.simplicial_complex.add_connections(("Cow", "Rabbit"))
+        self.assertRaises(abst_simplcl_cmplx.ASCInsertionError,
+                          self.simplicial_complex.add_connections,
+                          ("Cow", "Rabbit", "Horse"))
 
 
     def tearDown(self):
