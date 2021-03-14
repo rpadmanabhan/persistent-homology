@@ -2,6 +2,9 @@
 import collections
 
 
+# Team : Bill Lee, Raghavendra Padmanabhan and Francisco Vargas
+#--------------------------------------------------------------------------------------
+
 class Vertex:
     ''' Representation of a vertex in the ASC class
     '''

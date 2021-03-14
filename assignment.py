@@ -10,6 +10,11 @@ import abst_simplcl_cmplx
 import numpy as np
 
 
+
+# Team : Bill Lee, Raghavendra Padmanabhan and Francisco Vargas
+#--------------------------------------------------------------------------------------
+
+
 class DataCoding1:
     ''' Simplicial Complex for the data in Coding assignment 1
     '''

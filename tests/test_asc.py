@@ -10,6 +10,9 @@ import abst_simplcl_cmplx
 import assignment
 
 
+# Team : Bill Lee, Raghavendra Padmanabhan and Francisco Vargas
+#--------------------------------------------------------------------------------------
+
 class TestASCInit(unittest.TestCase):
 
     def setUp(self):
