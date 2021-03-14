@@ -103,10 +103,20 @@ class TestExamples(unittest.TestCase):
         simplicial_complex = abst_simplcl_cmplx.ASC(vertices = vertices)
         for connections in assignment.partA.vertex_connections:
             simplicial_complex.add_connections(connections)
+
+        ## Check we have exactly the same simplices we inserted
+        self.assertEqual(sorted(simplicial_complex.ret_all_simplices(2), key = sorted),
+                         sorted([set(conn) for conn in assignment.partA.vertex_connections \
+                                 if len(conn) == 3], key = sorted))
+        self.assertEqual(sorted(simplicial_complex.ret_all_simplices(1), key = sorted),
+                         sorted([set(conn) for conn in assignment.partA.vertex_connections \
+                                 if len(conn) == 2], key = sorted))
+        self.assertEqual(sorted(simplicial_complex.ret_all_simplices(0), key = sorted),
+                         sorted([set((e,)) for e in assignment.partA.vertex_labels], key = sorted))
+        ## Double check that we have the expected number of them
         self.assertEqual(len(simplicial_complex.ret_all_simplices(2)), 9)
         self.assertEqual(len(simplicial_complex.ret_all_simplices(1)), 15)
         self.assertEqual(len(simplicial_complex.ret_all_simplices(0)), len(vertices))
-
 
     def test_exampleB(self):
         ''' Part B data from Coding assignment 1
@@ -117,6 +127,15 @@ class TestExamples(unittest.TestCase):
         simplicial_complex = abst_simplcl_cmplx.ASC(vertices = vertices)
         for connections in assignment.partB.vertex_connections:
             simplicial_complex.add_connections(connections)
+        self.assertEqual(sorted(simplicial_complex.ret_all_simplices(2), key = sorted),
+                         sorted([set(conn) for conn in assignment.partB.vertex_connections \
+                                 if len(conn) == 3], key = sorted))
+        self.assertEqual(sorted(simplicial_complex.ret_all_simplices(1), key = sorted),
+                         sorted([set(conn) for conn in assignment.partB.vertex_connections \
+                                 if len(conn) == 2], key = sorted))
+        self.assertEqual(sorted(simplicial_complex.ret_all_simplices(0), key = sorted),
+                         sorted([set((e,)) for e in assignment.partB.vertex_labels], key = sorted))
+        ## Double check that we have the expected number of them
         self.assertEqual(len(simplicial_complex.ret_all_simplices(2)), 8)
         self.assertEqual(len(simplicial_complex.ret_all_simplices(1)), 27)
         self.assertEqual(len(simplicial_complex.ret_all_simplices(0)), len(vertices))
