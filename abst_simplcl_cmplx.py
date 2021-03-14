@@ -1,6 +1,5 @@
 ## stdlib
 import collections
-import copy
 
 
 class Vertex:
@@ -13,12 +12,12 @@ class Vertex:
         self.parent           = kwargs.get("parent", None)
         self.level            = kwargs.get("level", None)
         self.connections      = kwargs.get("connections", set()) # child connections
-        self.tree_connections = kwargs.get("tree_connections", set()) # connections to edges in another part of the tree
+        self.tree_connections = kwargs.get("tree_connections", set()) # connections to vertices in other parts of the tree
 
     def __repr__(self):
         '''
         '''
-        return "Vertex(label = {}, parent = {}, level = {})".format(self.label, self.parent, self.level)
+        return "Vertex(label = {}, level = {})".format(self.label, self.level)
 
 
 class ASC:
@@ -82,11 +81,12 @@ class ASC:
         if parent is None:
             parent = self.root
 
-        # can take the sorted() out, keeping it for easier debugging
-        for child in sorted(parent.connections, key = lambda e: e.label):
+        # add this sorted() iteration, if you want to debug - maybe add a debug flag or something
+        # sorted(parent.connections, key = lambda e: e.label):
+        for child in parent.connections:
             labels.append(child.label)
             if child.level == n:
-                simplices.append(list(labels))
+                simplices.append(set(labels))
                 labels.pop()
             elif child.level > n:
                 break
@@ -113,6 +113,31 @@ class ASC:
                 self._get_simplices(n, simplices, parent, labels)
 
         return simplices
+
+
+    def ret_boundary_matrix(self, dim):
+        '''
+        '''
+        # Get all simplices in C_{dim} and C_{dim-1}
+        generators_C_dim         = self.ret_all_simplices(dim)
+        generators_C_dim_minus_1 = self.ret_all_simplices(dim - 1) if dim >= 1 \
+                                   else [{"0"}]
+        if len(generators_C_dim) == 0:
+            return [[0]]
+        ## initialize a matrix of zeros - TO DO: pull in numpy/fast matrix library
+        boundary_matrix = [[0 for col in range(len(generators_C_dim))] \
+                           for row in range(len(generators_C_dim_minus_1))]
+        ## fill matrix with a 1 if there one generator is a boundary of the other
+        ## e.g. {Dog} subset {Dog, Horse}; {Dog, Horse} subset {Dog, Horse, Cat}
+        for i, r in enumerate(generators_C_dim_minus_1):
+            for j, c in enumerate(generators_C_dim):
+                if r.issubset(c):
+                    boundary_matrix[i][j] = 1
+
+        return boundary_matrix
+
+
+
 
 
 
