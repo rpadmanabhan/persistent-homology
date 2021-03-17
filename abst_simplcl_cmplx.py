@@ -1,6 +1,8 @@
 ## stdlib
 import collections
 
+## 3rd party
+import numpy as np
 
 # Team : Bill Lee, Raghavendra Padmanabhan and Francisco Vargas
 #--------------------------------------------------------------------------------------
@@ -152,11 +154,11 @@ class ASC:
         generators_C_dim_minus_1 = self.ret_all_simplices(dim - 1) if dim >= 1 \
                                    else [{"0"}]
         if len(generators_C_dim) == 0:
-            return [[0]]
-        ## initialize a matrix of zeros - TO DO: pull in numpy/fast matrix library
-        boundary_matrix = [[0 for col in range(len(generators_C_dim))] \
-                           for row in range(len(generators_C_dim_minus_1))]
-        ## fill matrix with a 1 if there one generator is a boundary of the other
+            return np.array([[0]], dtype = bool)
+        ## initialize a matrix of zeros
+        boundary_matrix = np.zeros((len(generators_C_dim_minus_1),
+                                    len(generators_C_dim)), dtype = np.bool)
+        ## fill matrix with a 1 if one generator is a boundary of the other
         ## e.g. {Dog} subset {Dog, Horse}; {Dog, Horse} subset {Dog, Horse, Cat}
         ## Using Z_2 for encoding the boundary map/matrix
         for i, r in enumerate(generators_C_dim_minus_1):

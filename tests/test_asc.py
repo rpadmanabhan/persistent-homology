@@ -9,6 +9,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import abst_simplcl_cmplx
 import assignment
 
+## 3rd party
+import numpy as np
 
 # Team : Bill Lee, Raghavendra Padmanabhan and Francisco Vargas
 #--------------------------------------------------------------------------------------
@@ -157,16 +159,21 @@ class RetBoundaryMatrix(unittest.TestCase):
         for connections in [("V1", "V2"), ("V1", "V3"), ("V2", "V3"),
                             ("V1", "V2", "V3")]:
             simplicial_complex.add_connections(connections)
-        self.assertEqual(simplicial_complex.ret_boundary_matrix(0),
-                         [[0, 0, 0]])
+        self.assertEqual(
+            (simplicial_complex.ret_boundary_matrix(0) ==  \
+             np.array([[0, 0, 0]], dtype = bool)).all(), True)
         # Note: Order can be different depending on how data was loaded to tree
         # sorted is only to rearrange columns of matrix for comparison for equality - no change in interpretation of the matrix.
-        self.assertEqual(sorted(simplicial_complex.ret_boundary_matrix(1)),
-                         sorted([[1, 1, 0], [1, 0, 1], [0, 1, 1]]))
-        self.assertEqual(simplicial_complex.ret_boundary_matrix(2),
-                         [[1], [1], [1]])
-        self.assertEqual(simplicial_complex.ret_boundary_matrix(3),
-                         [[0]])
+        self.assertEqual(
+            (np.sort(simplicial_complex.ret_boundary_matrix(1)) == \
+             np.sort(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 1]],
+                              dtype = bool))).all(), True)
+        self.assertEqual(
+            (simplicial_complex.ret_boundary_matrix(2) == \
+             np.array([[1], [1], [1]], dtype  = bool)).all(), True)
+        self.assertEqual(
+            (simplicial_complex.ret_boundary_matrix(3) == \
+             np.array([[0]], dtype = bool)).all(), True)
 
 
     ## TO DO: Work these out by hand and add here.
