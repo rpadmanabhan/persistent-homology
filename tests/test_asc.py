@@ -82,6 +82,11 @@ class TestASCInsertConnection(unittest.TestCase):
         self.assertRaises(abst_simplcl_cmplx.ASCInsertionError,
                           self.simplicial_complex.add_connections,
                           ("Cow", "Rabbit", "Horse"))
+        self.simplicial_complex.add_connections(("Cow", "Horse"))
+        self.assertRaises(abst_simplcl_cmplx.ASCInsertionError,
+                          self.simplicial_complex.add_connections,
+                          ("Cow", "Rabbit", "Horse"))
+
 
 
     def tearDown(self):
@@ -160,20 +165,20 @@ class RetBoundaryMatrix(unittest.TestCase):
                             ("V1", "V2", "V3")]:
             simplicial_complex.add_connections(connections)
         self.assertEqual(
-            (simplicial_complex.ret_boundary_matrix(0) ==  \
-             np.array([[0, 0, 0]], dtype = bool)).all(), True)
+            (simplicial_complex.ret_boundary_matrix(0)[0] ==  \
+             np.array([[0, 0, 0]], dtype = int)).all(), True)
         # Note: Order can be different depending on how data was loaded to tree
         # sorted is only to rearrange columns of matrix for comparison for equality - no change in interpretation of the matrix.
         self.assertEqual(
-            (np.sort(simplicial_complex.ret_boundary_matrix(1)) == \
+            (np.sort(simplicial_complex.ret_boundary_matrix(1)[0]) == \
              np.sort(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 1]],
-                              dtype = bool))).all(), True)
+                              dtype = int))).all(), True)
         self.assertEqual(
-            (simplicial_complex.ret_boundary_matrix(2) == \
-             np.array([[1], [1], [1]], dtype  = bool)).all(), True)
+            (simplicial_complex.ret_boundary_matrix(2)[0] == \
+             np.array([[1], [1], [1]], dtype  = int)).all(), True)
         self.assertEqual(
-            (simplicial_complex.ret_boundary_matrix(3) == \
-             np.array([[0]], dtype = bool)).all(), True)
+            (simplicial_complex.ret_boundary_matrix(3)[0] == \
+             np.array([[0]], dtype = int)).all(), True)
 
 
     ## TO DO: Work these out by hand and add here.

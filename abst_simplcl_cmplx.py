@@ -47,6 +47,7 @@ class ASC:
         '''
         '''
         self.root           = Vertex(label = "root", level = -1)
+        ## TO DO: vertex_tracker does not seem very useful at the moment. Consider incorporating it into Vertex by making it a dict
         self.vertex_tracker = {}
         self.level_tracker  = collections.defaultdict(set)
         self.max_level      = 0
@@ -89,7 +90,7 @@ class ASC:
                 raise ASCInsertionError(tuple(labels), tuple((parent.label,)))
             vertex = self.vertex_tracker.get((parent.label, labels[i + 1], i + 1), None)
             if vertex is None:
-                ## We always expect a lower dim simplex to be present in this case. E.g. inserting {"Cow", "Horse"} => {"Cow"} is present
+                ## We always expect a lower dim simplex to be present in this case. E.g. inserting {"Cow", "Horse", "Rabbit"} => {"Cow", "Horse"} is present
                 if len(labels) > 2 and (parent.label, labels[i + 1], i) not in self.vertex_tracker:
                     raise ASCInsertionError(tuple(labels), tuple((parent.label, labels[i+1])))
                 vertex = Vertex(label = labels[i + 1], parent = parent, level = i + 1)
@@ -154,19 +155,18 @@ class ASC:
         generators_C_dim_minus_1 = self.ret_all_simplices(dim - 1) if dim >= 1 \
                                    else [{"0"}]
         if len(generators_C_dim) == 0:
-            return np.array([[0]], dtype = bool)
-        ## initialize a matrix of zeros
+            return np.array([[0]], dtype = int)
+        ## initialize a matrix of zeros - TO DO: Use Z_2/bool for encoding the boundary map/matrix, could not find a built in numpy function to matrix multiply in Z2
         boundary_matrix = np.zeros((len(generators_C_dim_minus_1),
-                                    len(generators_C_dim)), dtype = np.bool)
+                                    len(generators_C_dim)), dtype = int)
         ## fill matrix with a 1 if one generator is a boundary of the other
         ## e.g. {Dog} subset {Dog, Horse}; {Dog, Horse} subset {Dog, Horse, Cat}
-        ## Using Z_2 for encoding the boundary map/matrix
         for i, r in enumerate(generators_C_dim_minus_1):
             for j, c in enumerate(generators_C_dim):
                 if r.issubset(c):
                     boundary_matrix[i][j] = 1
 
-        return boundary_matrix
+        return (boundary_matrix, generators_C_dim_minus_1, generators_C_dim)
 
 
 

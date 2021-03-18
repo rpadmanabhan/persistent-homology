@@ -1,6 +1,5 @@
 ## stdlib
 import itertools
-import pprint
 import sys
 
 ## our modules
@@ -8,7 +7,8 @@ import abst_simplcl_cmplx
 
 ## 3rd party
 import numpy as np
-
+import scipy
+import scipy.linalg
 
 
 # Team : Bill Lee, Raghavendra Padmanabhan and Francisco Vargas
@@ -92,20 +92,63 @@ def submission2(data, label):
     print("\nBoundaries in $C_0$ are: \n")
     print("\nBoundary of a vertex is 0, so all boundaries in $C_0$ are just 0.")
 
+
+## Took this code as is from the top answer : https://stackoverflow.com/questions/17129290/numpy-2d-and-1d-array-to-latex-bmatrix
+def bmatrix(a):
+    """Returns a LaTeX bmatrix
+
+    :a: numpy array
+    :returns: LaTeX bmatrix as a string
+    """
+    if len(a.shape) > 2:
+        raise ValueError('bmatrix can at most display two dimensions')
+    lines = str(a).replace('[', '').replace(']', '').splitlines()
+    rv = [r'\begin{bmatrix}']
+    rv += ['  ' + ' & '.join(l.split()) + r'\\' for l in lines]
+    rv +=  [r'\end{bmatrix}_{' + '{} \\times {}'.format(a.shape[0], a.shape[1]) + '}']
+    return '\n'.join(rv)
+
+
 def submission3(data, label):
     ''' Submission for coding assignment 3 - Boundary Matrices
     '''
     ## Using numpy as it prints larger matrices better
-    print("Boundary Matrix for {}:\n".format(label))
-    print("del2:")
-    pprint.pprint(np.matrix(data.simplicial_complex.ret_boundary_matrix(2)))
-    print("del1:")
-    pprint.pprint(np.matrix(data.simplicial_complex.ret_boundary_matrix(1)))
-    print("del0:")
-    pprint.pprint(np.matrix(data.simplicial_complex.ret_boundary_matrix(0)))
-    print("\n")
+    print("Boundary Matrices for {}:\n".format(label))
+    for d in [2, 1, 0]:
+        ## Get the boundary matrix and print it
+        matrix, c_n_1_generators, c_n_generators = data.simplicial_complex.ret_boundary_matrix(d)
+        print("$\\delta_{}:".format(d))
+        print(bmatrix(matrix))
+        print("$")
+        print("\n")
+        ## store the generators as a tuple(dim > 1) or str(dim==1) for cleaner printing
+        c_n_1_generators = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_1_generators]
+        c_n_generators   = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_generators]
+        c_n_vecs = {}
+        ## Get all generators in vector form
+        for idx, generator in enumerate(c_n_generators):
+            c_n_vecs[generator] = np.zeros((len(c_n_generators), 1), dtype = np.bool)
+            c_n_vecs[generator][idx] = 1
+        ## Boundaries for some linear combinations of our generators
+        print("Some select examples of boundaries computed using this matrix :\n")
+        for k in range(1, 4):
+            for linear_combination in itertools.combinations(c_n_generators, k):
+                vector = np.zeros((len(c_n_generators), 1), dtype = np.bool)
+                for generator in linear_combination:
+                    vector = vector ^ c_n_vecs[generator]
 
-
+                boundary = (matrix @ vector)%2
+                boundary_text = " + ".join(
+                    [str(e) for e, mask in zip(c_n_1_generators, boundary) if mask])
+                if boundary_text == "":
+                    boundary_text = "0"
+                linear_combination_text = " + ".join((str(e).replace("'", "") for e in linear_combination))
+                print("Boundary of {} is: {}".format(linear_combination_text, boundary_text.replace("'", "")))
+                print("\n")
+                ## There are too many combinations so just print 1 for each k > 1
+                if k > 1:
+                    break
+        print("\n")
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
