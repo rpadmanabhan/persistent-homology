@@ -109,6 +109,27 @@ def bmatrix(a):
     return '\n'.join(rv)
 
 
+def matrix_with_labels(a, row_labels, col_labels, matrix_name):
+    ''' Returns a LaTeX blockarray matrix with row and column headers
+    '''
+    lines = str(a).replace('[', '').replace(']', '').splitlines()
+    latex_output = [r'$\begin{small}']
+    latex_output += [r'\mathbf{' + matrix_name + r'}' + r' = \begin{blockarray}{r*{' + str(len(col_labels)) + r'}{c}}']
+    col_labels = tuple(r'\rotatebox{-90}{' + str(e).replace("'", "") + r'}' for e in col_labels)
+    latex_output += [' & ' + ' & '.join(col_labels) + r'\\']
+    latex_output += [r'\begin{block}{ r!{\,}(' + 'c'*len(col_labels) + r')}']
+    for i, l in enumerate(lines):
+        temp = l.split()
+        row_label = str(row_labels[i]).replace("'", "")
+        temp.insert(0, row_label)
+        latex_output.append('  ' + ' & '.join(temp) + r'\\')
+    latex_output += [r'\end{block}']
+    latex_output += [r'\end{blockarray}_{' + str(len(row_labels)) + r' \times ' + str(len(col_labels)) + r'}']
+    latex_output += [r'\end{small}$']
+
+    return '\n'.join(latex_output)
+
+
 def submission3(data, label):
     ''' Submission for coding assignment 3 - Boundary Matrices
     '''
@@ -117,13 +138,15 @@ def submission3(data, label):
     for d in [2, 1, 0]:
         ## Get the boundary matrix and print it
         matrix, c_n_1_generators, c_n_generators = data.simplicial_complex.ret_boundary_matrix(d)
-        print("$\\delta_{}:".format(d))
-        print(bmatrix(matrix))
-        print("$")
-        print("\n")
         ## store the generators as a tuple(dim > 1) or str(dim==1) for cleaner printing
         c_n_1_generators = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_1_generators]
         c_n_generators   = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_generators]
+
+        matrix_name = "\\partial_{}".format(d)
+        print(matrix_with_labels(matrix, c_n_1_generators, c_n_generators, matrix_name))
+        print("\n")
+
+
         c_n_vecs = {}
         ## Get all generators in vector form
         for idx, generator in enumerate(c_n_generators):
