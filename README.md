@@ -22,8 +22,5 @@ simplicial_complex.ret_all_simplices(2)
 
 #### Run tests
 ```
-python3 tests/test_asc.py -v
+python3 -m unittest discover tests/ -v
 ```
-
-##### Note: abstract simplicial complexes A and B from the coding assignment are represented in class TestExamples under tests/test_asc.py
-
