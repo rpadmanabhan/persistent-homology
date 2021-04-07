@@ -114,7 +114,7 @@ class ASC:
 
         # add this sorted() iteration, if you want to debug - maybe add a debug flag or something
         # sorted(parent.connections, key = lambda e: e.label):
-        for child in parent.connections:
+        for child in sorted(parent.connections, key = lambda e: e.label):
             labels.append(child.label)
             if child.level == n:
                 simplices.append(set(labels))
@@ -154,11 +154,10 @@ class ASC:
         generators_C_dim         = self.ret_all_simplices(dim)
         generators_C_dim_minus_1 = self.ret_all_simplices(dim - 1) if dim >= 1 \
                                    else [{"0"}]
-        if len(generators_C_dim) == 0:
-            return np.array([[0]], dtype = np.uint8)
         ## initialize a matrix of zeros - TO DO: Use Z_2/bool for encoding the boundary map/matrix, could not find a built in numpy function to matrix multiply in Z2
-        boundary_matrix = np.zeros((len(generators_C_dim_minus_1),
-                                    len(generators_C_dim)), dtype = np.uint8)
+        boundary_matrix = np.zeros(
+            (max(len(generators_C_dim_minus_1), 1), max(len(generators_C_dim), 1)),
+            dtype = np.uint8)
         ## fill matrix with a 1 if one generator is a boundary of the other
         ## e.g. {Dog} subset {Dog, Horse}; {Dog, Horse} subset {Dog, Horse, Cat}
         for i, r in enumerate(generators_C_dim_minus_1):

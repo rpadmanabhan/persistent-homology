@@ -130,14 +130,27 @@ def smith_normal_form(A):
          [np.zeros(shape = (ncols, nrows), dtype = np.uint8),
           np.eye(ncols, dtype = np.uint8)]])
     ## Use Row/Col ops to transform A to a diagonal matrix
+    # 1. Reduce it to echelon form, use column ops to reduce right of pivot cols to 0
     rank_A = row_echelon_Z2(B, (1, nrows, nrows + 1, nrows + ncols), reduce_cols = True)
+    # 2. Swap pivot cols with non pivot ones to get a diagonal matrix
+    prev_pivot_col = None
+    for j in range(nrows, nrows + ncols):
+        for i in range(0, nrows):
+            if not B[i][j]: continue
+            if i != j and prev_pivot_col is not None:
+                # swap with col next to previous i=j pivot
+                B[:, [prev_pivot_col + 1, j]] = B[:, [j, prev_pivot_col + 1]]
+                prev_pivot_col += 1
+            else:
+                prev_pivot_col = j
+            break
 
     P = B[0: nrows, 0: nrows]
     Q = B[nrows:, nrows:]
     D = B[0: nrows:, nrows:]
     ## Note:
-    ## basis for im(A) corresponds to the first rank_A cols for P_inv
-    ## basis for ker(A) corresponds to the last (n - rank_A) cols of Q
+    ## basis for im(A) corresponds to the first `rank_A` cols of P_inv
+    ## basis for ker(A) corresponds to the last `(n - rank_A)` cols of Q
     return (rank_A, inverse_Z2(P), D, Q)
 
 
@@ -181,11 +194,10 @@ def basis_homology_Z2(d_k, d_k1):
         for j in range(0, ncols_G_k):
             if G_k[i, j]:
                 ## We need the col number relative to ker_d_k sub-block
-                pivot_col = rank_img_d_k1 - j
+                pivot_col = j - rank_img_d_k1
                 assert pivot_col >= 0
                 pivot_cols.append(pivot_col)
                 break
-
         if len(pivot_cols) == rank_ker_d_k - rank_img_d_k1: break
 
     ## Corresponding columns in Z_k form a basis for H_k(C_k, d_k)

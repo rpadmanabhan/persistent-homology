@@ -4,6 +4,7 @@ import sys
 
 ## our modules
 import abst_simplcl_cmplx
+import matrix_ops
 
 ## 3rd party
 import numpy as np
@@ -72,27 +73,6 @@ partB = DataCoding1(
 
 
 
-def submission2(data, label):
-    ''' Submission for coding assignment 2 - Boundaries of the p-chains.
-    '''
-    ## Boundaries in C_2 are the boundaries of all 2-simplices, i.e. all edges or 1-simplices
-    print("Boundaries in $C_2$ are: \n")
-    for simplex in data.simplicial_complex.ret_all_simplices(2):
-        out = []
-        for b in itertools.combinations(list(simplex), 2):
-            out.append(str(tuple(b)))
-        out = " + ".join(out)
-        print("Boundary of the 2-simplex: {} is: {}\n".format(tuple(simplex), out))
-    ## Boundaries in C_1 are the boundaries of all 1-simplices, i.e. all vertices or  0-simplices
-    print("\nBoundaries in $C_1$ are: \n")
-    for simplex in data.simplicial_complex.ret_all_simplices(1):
-        v1, v2 = list(simplex)
-        print("Boundary of the 1-simplex: {} is: {} + {}\n".format(tuple(simplex), v1, v2))
-    ## Boundaries of C_0 are the boundaries of all 0-simplices, i.e. just 0
-    print("\nBoundaries in $C_0$ are: \n")
-    print("\nBoundary of a vertex is 0, so all boundaries in $C_0$ are just 0.")
-
-
 ## Took this code as is from the top answer : https://stackoverflow.com/questions/17129290/numpy-2d-and-1d-array-to-latex-bmatrix
 def bmatrix(a):
     """Returns a LaTeX bmatrix
@@ -128,6 +108,27 @@ def matrix_with_labels(a, row_labels, col_labels, matrix_name):
     latex_output += [r'\end{small}$']
 
     return '\n'.join(latex_output)
+
+
+def submission2(data, label):
+    ''' Submission for coding assignment 2 - Boundaries of the p-chains.
+    '''
+    ## Boundaries in C_2 are the boundaries of all 2-simplices, i.e. all edges or 1-simplices
+    print("Boundaries in $C_2$ are: \n")
+    for simplex in data.simplicial_complex.ret_all_simplices(2):
+        out = []
+        for b in itertools.combinations(list(simplex), 2):
+            out.append(str(tuple(b)))
+        out = " + ".join(out)
+        print("Boundary of the 2-simplex: {} is: {}\n".format(tuple(simplex), out))
+    ## Boundaries in C_1 are the boundaries of all 1-simplices, i.e. all vertices or  0-simplices
+    print("\nBoundaries in $C_1$ are: \n")
+    for simplex in data.simplicial_complex.ret_all_simplices(1):
+        v1, v2 = list(simplex)
+        print("Boundary of the 1-simplex: {} is: {} + {}\n".format(tuple(simplex), v1, v2))
+    ## Boundaries of C_0 are the boundaries of all 0-simplices, i.e. just 0
+    print("\nBoundaries in $C_0$ are: \n")
+    print("\nBoundary of a vertex is 0, so all boundaries in $C_0$ are just 0.")
 
 
 def submission3(data, label):
@@ -173,6 +174,50 @@ def submission3(data, label):
                     break
         print("\n")
 
+
+def submission4(data, label):
+    ''' Submission for coding assignment 4 - Kernels, Homologies, Ranks
+    '''
+    rank = {"ker": [0, 0, 0], "img": [0, 0, 0], "homol": [0, 0, 0]}
+    print("\n{}\n".format(label))
+    print("\nKernel of the boundary matrices:\n")
+    for d in [2, 1, 0]:
+        print("\nC_{}:\n".format(d))
+        matrix, c_n_1_generators, c_n_generators = data.simplicial_complex.ret_boundary_matrix(d)
+        c_n_generators   = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_generators]
+        basis_img, basis_ker = matrix_ops.basis_img_ker_Z2(matrix)
+        rank["ker"][d] = np.shape(basis_ker)[1]
+        rank["img"][d] = np.shape(basis_img)[1]
+        for ker_col in basis_ker.T:
+            ker_text = " + ".join(
+                [str(e) for e, mask in zip(c_n_generators, ker_col) if mask]).replace("'", "")
+            if ker_text == "":
+                ker_text = "0"
+            print(ker_text)
+
+    print("\nHomologies:\n")
+    for d in [2, 1, 0]:
+        print("\nC_{}:\n".format(d))
+        matrix_d, c_n_1_generators, c_n_generators = data.simplicial_complex.ret_boundary_matrix(d)
+        c_n_generators   = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_generators]
+        matrix_d1, _, _ = data.simplicial_complex.ret_boundary_matrix(d + 1)
+        basis_homol = matrix_ops.basis_homology_Z2(matrix_d, matrix_d1)
+        rank["homol"][d] = np.shape(basis_homol)[1]
+        for homol_col in basis_homol.T:
+            homol_text = " + ".join(
+                [str(e) for e, mask in zip(c_n_generators, homol_col) if mask]).replace("'", "")
+            if homol_text == "":
+                homol_text = "0"
+            print(homol_text)
+
+    print("\nRanks of Image, Kernel and Homology:\n")
+    for d in [2, 1, 0]:
+        print("\nC_{}:\n".format(d))
+        print("Rank of the Image is: {}".format(rank["img"][d]))
+        print("Rank of the Kernel is: {}".format(rank["ker"][d]))
+        print("Rank of the Homology is: {}".format(rank["homol"][d]))
+    print("\n-------------------------------------------------------------------------\n")
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         print("Specify param coding2 or coding3 for specific output")
@@ -187,3 +232,7 @@ if __name__ == '__main__':
     elif sys.argv[1].lower() == "coding3":
         submission3(partA, "Part A")
         submission3(partB, "Part B")
+    elif sys.argv[1].lower() == "coding4":
+        submission4(partA, "Part A")
+        submission4(partB, "Part B")
+
