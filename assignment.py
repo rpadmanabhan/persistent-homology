@@ -180,9 +180,9 @@ def submission4(data, label):
     '''
     rank = {"ker": [0, 0, 0], "img": [0, 0, 0], "homol": [0, 0, 0]}
     print("\n{}\n".format(label))
-    print("\nKernel of the boundary matrices:\n")
     for d in [2, 1, 0]:
-        print("\nC_{}:\n".format(d))
+        out = ["\\begin{enumerate}"]
+        print("\nBasis for the Kernel of the boundary operator in $C_{}$ consists of :\n".format(d))
         matrix, c_n_1_generators, c_n_generators = data.simplicial_complex.ret_boundary_matrix(d)
         c_n_generators   = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_generators]
         basis_img, basis_ker = matrix_ops.basis_img_ker_Z2(matrix)
@@ -191,13 +191,13 @@ def submission4(data, label):
         for ker_col in basis_ker.T:
             ker_text = " + ".join(
                 [str(e) for e, mask in zip(c_n_generators, ker_col) if mask]).replace("'", "")
-            if ker_text == "":
-                ker_text = "0"
-            print(ker_text)
+            out.append("\item " + ker_text)
+        out.append("\\end{enumerate}")
+        print("\n".join(out))
 
-    print("\nHomologies:\n")
     for d in [2, 1, 0]:
-        print("\nC_{}:\n".format(d))
+        out = ["\\begin{enumerate}"]
+        print("\ntextbf{Basis for the Homology in $C_{}$ consists of :\n".format(d))
         matrix_d, c_n_1_generators, c_n_generators = data.simplicial_complex.ret_boundary_matrix(d)
         c_n_generators   = [tuple(sorted(e)) if len(e) > 1 else str(next(iter(e))) for e in c_n_generators]
         matrix_d1, _, _ = data.simplicial_complex.ret_boundary_matrix(d + 1)
@@ -206,16 +206,16 @@ def submission4(data, label):
         for homol_col in basis_homol.T:
             homol_text = " + ".join(
                 [str(e) for e, mask in zip(c_n_generators, homol_col) if mask]).replace("'", "")
-            if homol_text == "":
-                homol_text = "0"
-            print(homol_text)
+            out.append("\item " + homol_text)
+        out.append("\\end{enumerate}")
+        print("\n".join(out))
 
-    print("\nRanks of Image, Kernel and Homology:\n")
+    print("\nRanks of the Image, Kernel and Homology:\n")
     for d in [2, 1, 0]:
-        print("\nC_{}:\n".format(d))
-        print("Rank of the Image is: {}".format(rank["img"][d]))
-        print("Rank of the Kernel is: {}".format(rank["ker"][d]))
-        print("Rank of the Homology is: {}".format(rank["homol"][d]))
+        print("\n$C_{}$:\n".format(d))
+        print("Rank of the Image is: {}\n".format(rank["img"][d]))
+        print("Rank of the Kernel is: {}\n".format(rank["ker"][d]))
+        print("Rank of the Homology is: {}\n".format(rank["homol"][d]))
     print("\n-------------------------------------------------------------------------\n")
 
 if __name__ == '__main__':
