@@ -152,7 +152,16 @@ class RetBoundaryMatrix(unittest.TestCase):
     def setUp(self):
         '''
         '''
-        pass
+        self.assignment_simplicial_complexes = []
+        for data in [assignment.partA, assignment.partB]:
+            vertices = set(
+                (abst_simplcl_cmplx.Vertex(label = label) for label in \
+                 data.vertex_labels))
+            simplicial_complex = abst_simplcl_cmplx.ASC(vertices = vertices)
+            for connections in data.vertex_connections:
+                simplicial_complex.add_connections(connections)
+            self.assignment_simplicial_complexes.append(simplicial_complex)
+
 
     def test_2simplex(self):
         ''' Compute boundary matrices for different maps of a 2-simplex, i.e. a triangle (filled)
@@ -184,27 +193,21 @@ class RetBoundaryMatrix(unittest.TestCase):
     def test_boundary_of_boundary(self):
         ''' Test to make sure the boundary of a boundary is 0
         '''
-        vertices = set(
-            (abst_simplcl_cmplx.Vertex(label = label) for label in \
-             assignment.partA.vertex_labels))
-        simplicial_complex = abst_simplcl_cmplx.ASC(vertices = vertices)
-        for connections in assignment.partA.vertex_connections:
-            simplicial_complex.add_connections(connections)
+        for simplicial_complex in self.assignment_simplicial_complexes:
+            boundary_matrix_C_2, c_1_generators, c_2_generators = simplicial_complex.ret_boundary_matrix(2)
+            boundary_matrix_C_1, c_0_generators, _ = simplicial_complex.ret_boundary_matrix(1)
+            for _ in range(100):
+                rand_vec = np.random.randint(2, size = (len(c_2_generators), 1), dtype = np.uint8)
+                boundary1 = (boundary_matrix_C_2 @ rand_vec) % 2
+                boundary2 = (boundary_matrix_C_1 @ boundary1) % 2
+                self.assertEqual(np.all(boundary2 == 0), True)
 
-        boundary_matrix_C_2, c_1_generators, c_2_generators = simplicial_complex.ret_boundary_matrix(2)
-        boundary_matrix_C_1, c_0_generators, _ = simplicial_complex.ret_boundary_matrix(1)
-        for _ in range(100):
-            rand_vec = np.random.randint(2, size = (len(c_2_generators), 1), dtype = np.uint8)
-            boundary1 = (boundary_matrix_C_2 @ rand_vec) % 2
-            boundary2 = (boundary_matrix_C_1 @ boundary1) % 2
-            self.assertEqual(np.all(boundary2 == 0), True)
-
-        boundary_matrix_C_0, _, _ = simplicial_complex.ret_boundary_matrix(0)
-        for _ in range(100):
-            rand_vec = np.random.randint(2, size = (len(c_1_generators), 1), dtype = np.uint8)
-            boundary1 = (boundary_matrix_C_1 @ rand_vec) % 2
-            boundary2 = (boundary_matrix_C_0 @ boundary1) % 2
-            self.assertEqual(np.all(boundary2 == 0), True)
+            boundary_matrix_C_0, _, _ = simplicial_complex.ret_boundary_matrix(0)
+            for _ in range(100):
+                rand_vec = np.random.randint(2, size = (len(c_1_generators), 1), dtype = np.uint8)
+                boundary1 = (boundary_matrix_C_1 @ rand_vec) % 2
+                boundary2 = (boundary_matrix_C_0 @ boundary1) % 2
+                self.assertEqual(np.all(boundary2 == 0), True)
 
 if __name__ == '__main__':
     unittest.main()
