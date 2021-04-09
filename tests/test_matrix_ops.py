@@ -7,8 +7,8 @@ import unittest
 import numpy as np
 
 ## our modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import matrix_ops
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from numerics import matrix_ops
 
 
 class TestRowEchelon(unittest.TestCase):

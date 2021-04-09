@@ -1,10 +1,17 @@
+# instalation
+
+run in the root dir
+```
+pip install -e .
+```
+
 # abstract-simplicial-complex
 
 ## Representation of an abstract simplicial complex as a tree datastructure in Python3.
 
 #### Usage - Assuming python3.5+, should work for any python3
 ```python
-import abst_simplcl_cmplx
+from tda import abst_simplcl_cmplx
 
 ## Initialize an abstract simplicial complex
 simplicial_complex = abst_simplcl_cmplx.ASC(

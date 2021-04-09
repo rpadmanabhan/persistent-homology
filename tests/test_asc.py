@@ -5,9 +5,10 @@ import sys
 import unittest
 
 ## our modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import abst_simplcl_cmplx
-import assignment
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# import abst_simplcl_cmplx
+from tda import abst_simplcl_cmplx
+from assignments import assignment
 
 ## 3rd party
 import numpy as np

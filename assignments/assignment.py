@@ -3,8 +3,8 @@ import itertools
 import sys
 
 ## our modules
-import abst_simplcl_cmplx
-import matrix_ops
+from tda import abst_simplcl_cmplx
+from numerics import matrix_ops
 
 ## 3rd party
 import numpy as np
