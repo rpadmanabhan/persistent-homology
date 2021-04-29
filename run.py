@@ -1,4 +1,4 @@
-
+import os
 import sys
 
 import numpy as np
@@ -8,7 +8,7 @@ import persistent_homology
 import numerics
 
 
-dump_to_disk = False
+dump_to_disk = True
 
 
 def save_data(pik_file, data):
@@ -16,7 +16,7 @@ def save_data(pik_file, data):
         pickle.dump(data, f)
 
 
-def main(infile, cutoff):
+def main(infile):
     '''
     '''
     data = []
@@ -28,8 +28,7 @@ def main(infile, cutoff):
     data = np.array(data).reshape((len(data), len(contents[1:])))
 
 
-    vr_complex = persistent_homology.VRComplex(
-        epsilon = cutoff, vertices = data, n = 4)
+    vr_complex = persistent_homology.VRComplex(vertices = data, n = 4)
     nrows, ncols = vr_complex.boundary_matrix.shape
     indptr       = vr_complex.boundary_matrix.indptr
     indices      = vr_complex.boundary_matrix.indices
@@ -40,17 +39,13 @@ def main(infile, cutoff):
         vr_complex.simplices_for_lookup,
         vr_complex.weights)
 
-    ## Plots
-    plotname = infile.replace(".csv", ".birth_death.png")
-    persistent_homology.birth_death_plot(intervals, plotname)
-
-    ## dump to disk if needed - expensive to compute pivots on whole data with no cutoff
+    ## dump to disk - expensive to compute pivots on whole data with no cutoff
     if dump_to_disk:
-        pik_file = infile.replace(".csv", ".saved.dat")
+        pik_file = infile.replace(".csv", ".saved.data")
         save_data(
             pik_file,
-            [infile, vr_complex, dict(pivots), dict(pivots_idx)]
+            [os.path.basename(infile), vr_complex, dict(pivots), dict(pivots_idx)]
         )
 
 if __name__ == '__main__':
-    main(sys.argv[1], float(sys.argv[2]))
+    main(sys.argv[1])

@@ -20,7 +20,25 @@ import matplotlib.pyplot as plt
 import numerics
 
 
-def birth_death_plot(intervals, plotname):
+def check_for_persistent_homologies(intervals, n = 10):
+    ''' Return the basis for the top n persistent homologies
+    '''
+    persistent_homologies = []
+    for dim, data in intervals.items():
+        for info in data:
+            birth, death, homol_basis, pivot_row, pivot_col = info
+            if birth != death:
+                assert death > birth
+                persistent_homologies.append((death - birth, birth, death, homol_basis))
+
+    persistent_homologies.sort(key = lambda e: e[0], reverse = True)
+
+    return persistent_homologies[0: n]
+
+
+
+
+def birth_death_plot(intervals, plotname, title):
     ''' Birth Death Plots
     '''
 
@@ -35,7 +53,7 @@ def birth_death_plot(intervals, plotname):
 
     lims = [
         -1,  # min of both axes
-        np.max([axs.get_xlim(), axs.get_ylim()]),  # max of both axes
+        12,  # max of both axes
     ]
 
     # now plot both limits against each other
@@ -43,7 +61,7 @@ def birth_death_plot(intervals, plotname):
     axs.set_aspect('equal')
     axs.set_xlim(lims)
     axs.set_ylim(lims)
-    axs.set_title("Birth Death Diagram" , fontweight = "bold")
+    axs.set_title("{}".format(title) , fontweight = "bold")
     axs.legend(loc = "best")
 
     plt.tight_layout()
@@ -70,9 +88,8 @@ def persistence(pivots, pivots_idx, simplices, weights, homol_dim_cutoff = 2):
         homol_dim      = len(homol_basis) - 1
         homol[homol_dim].append((homol_basis, pivot_row_idx, pivot_col_idx))
         homol_ranks[homol_dim] += 1
-        homol_interval = (
-            weights[pivot_row_idx], weights[pivot_col_idx],
-            pivot_row_idx, pivot_col_idx, homol_basis)
+        homol_interval = (weights[pivot_row_idx], weights[pivot_col_idx], homol_basis,
+                          pivot_row_idx, pivot_col_idx)
 
         intervals[homol_dim].append(homol_interval)
 
@@ -88,11 +105,9 @@ def persistence(pivots, pivots_idx, simplices, weights, homol_dim_cutoff = 2):
             if len(homol_basis) - 1 > homol_dim_cutoff: continue
 
             homol_dim      = len(homol_basis) - 1
-            homol[homol_dim].append((homol_basis, col, col))
+            homol[homol_dim].append((homol_basis, col, -1))
             homol_ranks[homol_dim] += 1
-            homol_interval = (
-                weights[col], weights[-1],
-                col, -1, homol_basis)
+            homol_interval = (weights[col], weights[-1], homol_basis, col, -1)
 
             intervals[homol_dim].append(homol_interval)
 
@@ -278,7 +293,7 @@ class VRComplex:
 
 
     def _filtration_boundary_matrix_with_cutoff(self):
-        '''
+        ''' TO DO: Need to finish this function - need to this for even medium datasets since filtration boundary matrix reduction is slow.
         '''
         idx_to_keep = self.weights <= self.epsilon
         self.weights = self.weights[idx_to_keep]
